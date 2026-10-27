@@ -1,0 +1,147 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AICTE Complaint Dashboard</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#1c2b42}
+header{background:#142b4a;color:white;padding:20px 28px;display:flex;justify-content:space-between;align-items:center}
+header h2{margin:0;font-size:21px}
+header p{margin:5px 0 0;color:#ccd8e8;font-size:12px}
+.layout{display:flex;min-height:90vh}
+nav{background:white;width:210px;padding:20px 12px;border-right:1px solid #e1e7f0}
+nav button{display:block;width:100%;padding:14px 12px;text-align:left;border:0;background:white;color:#465873;cursor:pointer;border-radius:7px;margin-bottom:7px}
+nav button.active,nav button:hover{background:#eaf1ff;color:#245bc0;font-weight:bold}
+main{padding:26px;width:100%;min-width:0}
+h1{font-size:26px;margin:0 0 8px}
+.sub{color:#728198;font-size:13px;margin-bottom:23px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}
+.card,.panel{background:white;border:1px solid #e1e7f0;border-radius:11px;padding:18px}
+.card p{font-size:12px;color:#728198;margin:0}
+.card h2{font-size:30px;margin:12px 0 5px}
+.small{font-size:11px;color:#728198}
+.panel{margin-bottom:18px}
+.panel h3{margin:0 0 17px;font-size:16px}
+.notice{background:#fff5df;border:1px solid #f0d9a2;border-radius:8px;padding:15px;margin-bottom:18px;font-size:13px;line-height:1.7}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+input,select{padding:11px;border:1px solid #dce4ef;border-radius:7px;background:white;max-width:100%}
+table{width:100%;border-collapse:collapse;min-width:680px;font-size:12px}
+th,td{padding:13px 10px;text-align:left;border-bottom:1px solid #eaf0f6}
+th{background:#f7f9fc;color:#687991}
+.tablewrap{overflow-x:auto}
+.status{padding:5px 8px;border-radius:15px;background:#fff0d1;color:#946000;font-size:10px;font-weight:bold}
+.red{background:#ffe4e2;color:#b62e2e}
+.green{background:#dff6e7;color:#197548}
+.blue{background:#e4edff;color:#2459b4}
+.action{border:0;background:none;color:#245bc0;cursor:pointer;font-weight:bold}
+.primary{background:#2864d7;color:white;border:0;border-radius:7px;padding:11px 15px;cursor:pointer}
+.secondary{background:white;border:1px solid #d5dfed;color:#245bc0;border-radius:7px;padding:10px 13px;cursor:pointer}
+.page{display:none}
+.page.active{display:block}
+.details{line-height:2.1;font-size:13px;color:#50627b}
+footer{font-size:11px;color:#7a899d;padding:10px 0}
+@media(max-width:850px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}nav{width:155px}main{padding:15px}}
+@media(max-width:540px){.layout{display:block}nav{width:100%;display:flex;overflow:auto;padding:8px}nav button{min-width:max-content;width:auto;margin:0 4px}header{padding:15px}header h2{font-size:17px}main{padding:12px}.cards{gap:8px}.card{padding:12px}.card h2{font-size:24px}}
+</style>
+</head>
+<body>
+<header>
+ <div><h2>AICTE | Complaint Intelligence</h2><p>Institution Complaint Monitoring & Status Dashboard</p></div>
+ <div style="font-size:12px">Authorized Official · Demo</div>
+</header>
+<div class="layout">
+<nav>
+ <button class="active" data-page="dashboard">▦ &nbsp; Dashboard</button>
+ <button data-page="complaints">▤ &nbsp; All Complaints</button>
+ <button data-page="institution">▣ &nbsp; Institution Profile</button>
+ <button data-page="overlap">⇄ &nbsp; Overlap Radar</button>
+</nav>
+<main>
+<section id="dashboard" class="page active">
+<h1>Dashboard Overview</h1>
+<div class="sub">Monitor institution-related complaints across Bureaus and Cells.</div>
+<div class="cards">
+ <div class="card"><p>Total Cases</p><h2 id="total">6</h2><span class="small">All sample records</span></div>
+ <div class="card"><p>Active Cases</p><h2 id="pending">4</h2><span class="small">Require further action</span></div>
+ <div class="card"><p>Disposed Cases</p><h2 id="disposed">2</h2><span class="small">Marked disposed</span></div>
+ <div class="card"><p>Potential Overlaps</p><h2>1</h2><span class="small">Official review needed</span></div>
+</div>
+<div class="notice"><b>⚠ Coordination alert</b><br>CASE-1001 and CASE-1002 are linked to the same sample institution and have similar complaint categories. Review the records before taking further action.</div>
+<div class="panel"><h3>Recent Complaint Cases</h3><div class="tablewrap"><table><thead><tr><th>Case ID</th><th>Institution</th><th>Bureau/Cell</th><th>Status</th><th>Action</th></tr></thead><tbody id="recent"></tbody></table></div></div>
+</section>
+
+<section id="complaints" class="page">
+<h1>All Complaint Cases</h1><div class="sub">Search and filter cases by institution, Bureau and status.</div>
+<div class="panel">
+<div class="filters"><input id="search" placeholder="Search case or institution..." oninput="render()">
+<select id="bureau" onchange="render()"><option value="">All Bureaus</option><option>RB</option><option>PGRC</option><option>Other Cell</option></select>
+<select id="filterStatus" onchange="render()"><option value="">All statuses</option><option>Pending</option><option>Under Process</option><option>Disposed</option></select></div>
+<div class="tablewrap"><table><thead><tr><th>Case ID</th><th>Institution</th><th>Category</th><th>Bureau</th><th>Status</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table></div>
+</div>
+</section>
+
+<section id="institution" class="page">
+<h1>Institution 360° Profile</h1><div class="sub">Consolidated history of complaints for one institution.</div>
+<div class="panel"><h3>Sample Institute of Technology</h3><div class="details"><b>Institution ID:</b> DEMO-1001<br><b>Region:</b> Central Region<br><b>Address:</b> Sample address, India<br><b>Linked cases:</b> 2<br><b>Involved Bureaus:</b> RB and PGRC</div></div>
+<div class="panel"><h3>Linked Complaint History</h3><div class="tablewrap"><table><thead><tr><th>Case ID</th><th>Category</th><th>Bureau</th><th>Status</th><th>Action</th></tr></thead><tbody id="linked"></tbody></table></div></div>
+</section>
+
+<section id="overlap" class="page">
+<h1>Smart Overlap Radar</h1><div class="sub">Review possible duplicate or related cases across Bureaus.</div>
+<div class="notice"><b>Potential overlap detected</b><br>Two active cases share the same institution ID and a similar complaint category. This is a suggestion for review, not a confirmed duplicate.</div>
+<div class="cards" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+<div class="panel"><span class="status blue">Regulation Bureau</span><h3 style="margin-top:15px">CASE-1001</h3><div class="details">Institution: Sample Institute of Technology<br>Category: Regulatory compliance<br>Status: Under Process</div></div>
+<div class="panel"><span class="status">PGRC</span><h3 style="margin-top:15px">CASE-1002</h3><div class="details">Institution: Sample Institute of Technology<br>Category: Regulatory compliance<br>Status: Pending</div></div>
+</div>
+<div class="panel"><h3>Matching reasons</h3><div class="details">✓ Same institution ID<br>✓ Similar complaint category<br>✓ Both cases are active</div><br><button class="primary" id="review" onclick="review()">Review & Link Cases</button><p id="result" class="details"></p></div>
+</section>
+
+<section id="caseDetail" class="page">
+<button class="secondary" onclick="go('complaints')">← Back to complaints</button>
+<h1 id="detailTitle" style="margin-top:20px">Case details</h1>
+<div class="sub">Complaint tracking and action history.</div>
+<div class="panel"><div id="detail" class="details"></div><br><button class="primary" onclick="markProgress()">Mark Under Process</button> <button class="secondary" onclick="go('overlap')">Check related cases</button><p id="updated" class="small"></p></div>
+</section>
+<footer>Demonstration prototype · Fictional sample data · Not connected to AICTE systems.</footer>
+</main>
+</div>
+<script>
+const data=[
+{id:"CASE-1001",inst:"Sample Institute of Technology",iid:"DEMO-1001",cat:"Regulatory compliance",bureau:"RB",status:"Under Process",officer:"Demo Officer A",date:"25 Oct 2026",next:"Review related complaint"},
+{id:"CASE-1002",inst:"Sample Institute of Technology",iid:"DEMO-1001",cat:"Regulatory compliance",bureau:"PGRC",status:"Pending",officer:"Demo Officer B",date:"24 Oct 2026",next:"Coordinate with RB"},
+{id:"CASE-1003",inst:"Central Engineering College",iid:"DEMO-1002",cat:"Student grievance",bureau:"PGRC",status:"Pending",officer:"Demo Officer C",date:"22 Oct 2026",next:"Examine complaint"},
+{id:"CASE-1004",inst:"Eastern Technical Institute",iid:"DEMO-1003",cat:"Infrastructure",bureau:"Other Cell",status:"Pending",officer:"Demo Officer D",date:"18 Oct 2026",next:"Verify pending action"},
+{id:"CASE-1005",inst:"Central Engineering College",iid:"DEMO-1002",cat:"Faculty grievance",bureau:"RB",status:"Disposed",officer:"Demo Officer E",date:"15 Oct 2026",next:"No further action recorded"},
+{id:"CASE-1006",inst:"National Technology Campus",iid:"DEMO-1004",cat:"Academic compliance",bureau:"RB",status:"Disposed",officer:"Demo Officer F",date:"12 Oct 2026",next:"No further action recorded"}
+];
+function tag(s){return '<span class="status '+(s==="Disposed"?"green":s==="Under Process"?"blue":s==="Escalated"?"red":"")+'">'+s+'</span>'}
+function button(c){return '<button class="action" onclick="openCase(\''+c.id+'\')">View →</button>'}
+function render(){
+ const q=(document.getElementById("search")?.value||"").toLowerCase(),b=document.getElementById("bureau")?.value||"",s=document.getElementById("filterStatus")?.value||"";
+ let filtered=data.filter(c=>(c.id+c.inst+c.cat).toLowerCase().includes(q)&&(!b||c.bureau===b)&&(!s||c.status===s));
+ document.getElementById("rows").innerHTML=filtered.map(c=>'<tr><td>'+c.id+'</td><td>'+c.inst+'</td><td>'+c.cat+'</td><td>'+c.bureau+'</td><td>'+tag(c.status)+'</td><td>'+button(c)+'</td></tr>').join("")||'<tr><td colspan="6">No cases found</td></tr>';
+ document.getElementById("recent").innerHTML=data.slice(0,4).map(c=>'<tr><td>'+c.id+'</td><td>'+c.inst+'</td><td>'+c.bureau+'</td><td>'+tag(c.status)+'</td><td>'+button(c)+'</td></tr>').join("");
+ document.getElementById("linked").innerHTML=data.filter(c=>c.iid==="DEMO-1001").map(c=>'<tr><td>'+c.id+'</td><td>'+c.cat+'</td><td>'+c.bureau+'</td><td>'+tag(c.status)+'</td><td>'+button(c)+'</td></tr>').join("");
+ document.getElementById("total").textContent=data.length;
+ document.getElementById("pending").textContent=data.filter(c=>c.status!=="Disposed").length;
+ document.getElementById("disposed").textContent=data.filter(c=>c.status==="Disposed").length;
+}
+function go(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));window.scrollTo(0,0)}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>go(b.dataset.page));
+let selected=null;
+function openCase(id){
+ selected=data.find(c=>c.id===id);go("caseDetail");document.getElementById("detailTitle").textContent=selected.id;
+ document.getElementById("detail").innerHTML="<b>Institution:</b> "+selected.inst+"<br><b>Institution ID:</b> "+selected.iid+"<br><b>Category:</b> "+selected.cat+"<br><b>Bureau/Cell:</b> "+selected.bureau+"<br><b>Status:</b> "+tag(selected.status)+"<br><b>Assigned officer:</b> "+selected.officer+"<br><b>Date received:</b> "+selected.date+"<br><b>Next action:</b> "+selected.next+"<hr><b>Action history</b><br>"+selected.date+" — Complaint registered<br>Assigned to "+selected.bureau+" — "+selected.officer;
+ document.getElementById("updated").textContent="";
+}
+function markProgress(){if(!selected)return;selected.status="Under Process";selected.next="Continue case review";render();openCase(selected.id);document.getElementById("updated").textContent="Demo status updated successfully."}
+function review(){
+ document.getElementById("result").textContent="Review recorded: CASE-1001 and CASE-1002 are marked as related for coordination. Their individual records remain separate. Lead Cell assignment requires an authorized decision.";
+ document.getElementById("review").textContent="Review Recorded";
+}
+render();
+</script>
+</body>
+</html>
